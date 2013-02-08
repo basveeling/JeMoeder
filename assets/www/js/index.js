@@ -42,6 +42,9 @@ var app = {
         upcommingtaskslist = $("#upcommingtasks");
         //Populate the list
         db.transaction(app.populateDB, app.errorCB, app.refetchTasks);
+        //Bind clicks
+        $("#tasksbutton").on('click',app.showTasks);
+        $("#tipsbutton").on('click',app.showTips);
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -56,19 +59,14 @@ var app = {
         tx.executeSql('DROP TABLE IF EXISTS `completed_tasks`');
 
         //Setup database
-        tx.executeSql('CREATE TABLE IF NOT EXISTS `tasks` (id unique, name, cycle_type, cycle_interval)');
-        tx.executeSql('CREATE TABLE IF NOT EXISTS `completed_tasks` (id unique, task_id, completion_date)');
+        tx.executeSql('CREATE TABLE IF NOT EXISTS `tasks` (id unique, name, cycle_type, cycle_interval, last_completed)');
 
         //Insert dummy data
-        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval) VALUES (1,"Beddengoed verschonen", "daily", 30)');
-        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval) VALUES (2, "Was draaien", "daily", 7)');
-        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval) VALUES (3, "Parteeeh", "daily", 2)');
-        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval) VALUES (4, "Afwassen", "daily", 1)');
-        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval) VALUES (5, "Bel je moeder!", "daily", 3)');
-
-
-        tx.executeSql('INSERT INTO `completed_tasks` (task_id, completion_date) VALUES (1, date("now"))');
-        tx.executeSql('INSERT INTO `completed_tasks` (task_id, completion_date) VALUES (2, date("now"))');
+        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval, last_completed) VALUES (1,"Beddengoed", "daily", 30, date("2013-01-01"))');
+        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval, last_completed) VALUES (2, "Was draaien", "daily", 7, date("now"))');
+        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval, last_completed) VALUES (3, "Parteeeh every day!", "daily", 1, date("2013-02-06"))');
+        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval, last_completed) VALUES (4, "Afwassen", "daily", 2, date("2013-01-08"))');
+        tx.executeSql('INSERT INTO `tasks` (id, name, cycle_type, cycle_interval, last_completed) VALUES (5, "Bel je moeder!", "daily", 3, date("2013-01-01"))');
 
     },
     setDone: function(task) {
@@ -78,16 +76,16 @@ var app = {
         console.log("setdone recieved: ");
         console.log(taskobj.id);
         db.transaction(function (tx) {
-            tx.executeSql('INSERT INTO `completed_tasks` (task_id, completion_date) VALUES (' + taskobj.id + ', date("now"))');
+            tx.executeSql('UPDATE `tasks` SET last_completed = date("now") WHERE `id` = ' +taskobj.id);
         }
         , app.errorCB, app.refetchTasks);
     },
     // Query the database
     //
     queryDB: function(tx) {
-        tx.executeSql("SELECT *,date(`completed_tasks`.completion_date ,'+' || `tasks`.cycle_interval || ' days') as deadline, max(`completed_tasks`.completion_date) FROM `tasks` LEFT JOIN completed_tasks ON `tasks`.id = `completed_tasks`.task_id WHERE completed_tasks.completion_date IS NULL OR deadline <= date('now') GROUP BY `tasks`.id", [], app.querySuccessCurrent, app.errorCB);
+        tx.executeSql("SELECT *, date(last_completed ,'+' || `tasks`.cycle_interval || ' days') as deadline FROM tasks WHERE deadline <= date('now') ORDER BY deadline ASC", [], app.querySuccessCurrent, app.errorCB);
 
-        tx.executeSql("SELECT *,date(`completed_tasks`.completion_date ,'+' || `tasks`.cycle_interval || ' days') as deadline, max(`completed_tasks`.completion_date) FROM `tasks` LEFT JOIN completed_tasks ON `tasks`.id = `completed_tasks`.task_id WHERE deadline > date('now') GROUP BY `tasks`.id", [], app.querySuccessUpcomming, app.errorCB);
+        tx.executeSql("SELECT *, date(last_completed ,'+' || `tasks`.cycle_interval || ' days') as deadline FROM tasks WHERE deadline > date('now') ORDER BY deadline ASC", [], app.querySuccessUpcomming, app.errorCB);
         // tx.executeSql("SELECT * FROM `tasks` LEFT JOIN completed_tasks AS CompeletedTask ON `tasks`.id = CompeletedTask.task_id GROUP BY `tasks`.id", [], app.querySuccess, app.errorCB);
     },
 
@@ -97,16 +95,17 @@ var app = {
         var len = results.rows.length;
         console.log("Task table: " + len + " rows found.");
         for (var i=0; i<len; i++){
-            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).name + " interval =  " + results.rows.item(i).cycle_interval + " Completed date =  " + results.rows.item(i).completion_date + " Deadline date =  " + results.rows.item(i).deadline);
+            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).name + " interval =  " + results.rows.item(i).cycle_interval + " Completed date =  " + results.rows.item(i).last_completed + " Deadline date =  " + results.rows.item(i).deadline);
             var task = {
                 id: results.rows.item(i).id,
                 name: results.rows.item(i).name,
                 cycle_type: results.rows.item(i).cycle_type,
                 cycle_interval: results.rows.item(i).cycle_interval,
-                completion_date: results.rows.item(i).completion_date,
+                last_completed: results.rows.item(i).last_completed,
+                deadline: results.rows.item(i).deadline,
             }
 
-            app.drawTask(task,currenttaskslist);
+            app.drawTask(task,currenttaskslist, false);
         }
     }, // Query the success callback
     //
@@ -114,16 +113,16 @@ var app = {
         var len = results.rows.length;
         console.log("Task table: " + len + " rows found.");
         for (var i=0; i<len; i++){
-            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).name + " interval =  " + results.rows.item(i).cycle_interval + " Completed date =  " + results.rows.item(i).completion_date + " Deadline date =  " + results.rows.item(i).deadline);
+            console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).name + " interval =  " + results.rows.item(i).cycle_interval + " Completed date =  " + results.rows.item(i).last_completed + " Deadline date =  " + results.rows.item(i).deadline);
             var task = {
                 id: results.rows.item(i).id,
                 name: results.rows.item(i).name,
                 cycle_type: results.rows.item(i).cycle_type,
                 cycle_interval: results.rows.item(i).cycle_interval,
-                completion_date: results.rows.item(i).completion_date,
+                last_completed: results.rows.item(i).last_completed,
+                deadline: results.rows.item(i).deadline,
             }
-
-            app.drawTask(task,upcommingtaskslist);
+            app.drawTask(task,upcommingtaskslist, true);
         }
     },
     // Transaction error callback
@@ -143,11 +142,41 @@ var app = {
         upcommingtaskslist.empty();
         currenttaskslist.empty();
     },
-    drawTask: function(task,tasklist) {
+    showTasks: function() {
+        $("#tipsview").fadeOut(500);
+        $("#tasksview").fadeIn(500);
+    },
+    showTips: function() {
+        $("#tasksview").fadeOut(500);
+        $("#tipsview").fadeIn(500);
+    },
+
+    drawTask: function(task,tasklist, ident) {
+        //Calculate the timedifference
+        var today=new Date()
+        var deadline=new Date(task.deadline) //Month is 0-11 in JavaScript
+
+
+        //Set 1 day in milliseconds
+        var one_day=1000*60*60*24
+
+        //Calculate difference btw the two dates, and convert to days
+        var days = Math.abs(Math.ceil((deadline.getTime()-today.getTime())/(one_day)));
         var taskobj = task;
-        var listobj = $("<li>" + task.name + "<span>Repeats: " + task.cycle_type  + "</span><span>Every: " + task.cycle_interval    + " days</span><span>Completed: " + task.completion_date  + "</span></li>");
-        var doneobj = $("<a href=\"#\" class=\"done\">DONE</a>");
+        var listobj = $("<li></li>");
+        var nameobj = $("<span class=\"name\">" + task.name + "</span>");
+        var daysobj = $("<span class=\"days\">" + days + "</span>");
+        var doneobj = $("<a href=\"#\" class=\"done\"></a>");
+
+        if(ident) { 
+
+            listobj.attr("style","margin-left: " + ((Math.log(days) + 1) * 40 - 30) + "px");
+
+        console.log(task.name + " has days: " + days);
+        } 
         listobj.append(doneobj);
+        listobj.append(nameobj);
+        listobj.append(daysobj);
         tasklist.append(listobj);
 
         doneobj.on('click', function() {

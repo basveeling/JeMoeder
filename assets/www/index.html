@@ -26,17 +26,32 @@
         <title>Je Moeder App</title>
     </head>
     <body>
+        <div class="overlay"></div>
         <div class="app">
-      <div class="header">
-                Je Moeder
+            <div class="header">
             </div>
-            <div class="main">
-                <h2>Current Tasks:</h2>
+            <div id="tasksview">
                 <ul id="currenttasks" class="taskslist">
-                </div>
-                <h2>Upcomming Tasks:</h2>
+                </ul>
+                <div class="tussenkop">Komende taken:</div>
                 <ul id="upcommingtasks" class="taskslist">
+                </ul>
+            </div>
+            <div id="tipsview">
+                <div id="tipsdesc">
+                    <span class="top"></span>
+                    <p>
+Heb je weer te veel gezopen en heb je nu braaksel op je  kleding? Giet er een mix van water en azijn op. Laat het 5 minuten intrekken en laat het in de wasmachine uitwassen. Ook kun je er gemalen koffie overstrooien en dan opvegen.
+</p>
+<p>Al is je t-shirt of blouse gewassen, tijdens het strijken komt de zweetlucht gewoon weer terug. De oplossing: azijn in het bakje van de wasverzachter doen zodat deze met de laatste spoelbeurt gebruikt wordt.</p>
                 </div>
+            </div>
+            <div class="actionbar">
+                <ul>
+                    <li><a href="#" id="tasksbutton"></a></li>
+                    <li><a href="#" id="tipsbutton"></a></li>
+                    <li><a href="#" id="panicbutton"></a></li>
+                </ul>
             </div>
         </div>
         <script type="text/javascript" src="cordova-2.4.0.js"></script>

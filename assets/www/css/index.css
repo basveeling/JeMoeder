@@ -29,7 +29,9 @@ body {
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
     background-color:#E4E4E4;
 /*    background-image: url("../img/huisstijl_background.png");*/
-    background-image: -webkit-radial-gradient(circle, rgba(0,0,0,0), rgba(0,0,0,0.4)), url("../img/huisstijl_background.png");
+    background-image: url("../img/huisstijl_background.png");
+
+    background-attachment:fixed;
 /*    background-image:linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
     background-image:-webkit-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
     background-image:-ms-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
@@ -49,12 +51,16 @@ body {
     width:100%;
 
 }
-
+.overlay {
+    width: 100%;
+    height: 100%;
+    background-image: -webkit-radial-gradient(50% 50%, circle , rgba(0,0,0,0), rgba(0,0,0,0.6));
+    position:fixed;
+}
 /* Portrait layout (default) */
 .app {
     width:100%;
     position:absolute;             /* position in the center of the screen */
-
 }
 
 /* Landscape layout (with min-width) */
@@ -67,50 +73,212 @@ body {
 
 
 .header{
-    height: 50px;
-    background-color:gray;
+    margin-top: 10px;
+    height: 80px;
+    background-image: url(../img/jemoeder.png);
+    background-repeat: no-repeat;
+    background-position: center;
     width: 100%;
     font-size: 20px;
     text-align: center;
     line-height: 50px;
     position:fixed;
+    overflow: auto;
 }
-.main {
-    margin-top:50px;
+#tasksview, #tipsview {
+    top: 95px;
+    position: absolute;
+    width: 100%;
+}
+
+#tipsview {
+    display: none;
+}
+
+#tipsdesc {
+/**/
+    background-image: url(../img/tipbottom.png);
+    /*background-color: white;*/
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    padding-top: 135px;
+    padding-bottom: 210px;
+}
+#tipsdesc p {
+    font-size: 20px;
+    padding: 10px 60px;
+
+    background-image: url(../img/tipmid.png);
+    background-repeat: repeat-y;
+
+    background-position: center 50px;
+    margin: 0px;
+}
+#tipsdesc span.top{
+    position: absolute;
+    background-image: url(../img/tiptop.png);
+    background-position: 0px -20px;
+    display: block;
+    width: 100%;
+    height: 135px;
+    overflow: auto;
+    top: 0px;
 }
 .taskslist {
     list-style-type: none;
     padding: 0px;
-    maring: 0px;
+    margin: 0px 0px 0px -20px;
 }
 
 .taskslist li {
     clear: both;
-    /*height: 100px;*/
-    border-bottom: 1px solid white;
+    height: 63px;
+    display: block;
     font-size: 20px;
     vertical-align: middle;
-    padding: 0px 20px 0px 20px;
+    padding: 25px 30px 25px 30px;
     font-weight: bold;
-    line-height: 50px;
     overflow: auto;
+    color: white;
+    font-size: 30px;
+    background-image: url(../img/button2.png);
+    overflow:hidden;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.taskslist li span{
+.taskslist li span.name{
+    color: white;
+    font-weight:bold;
+    text-shadow: 1px 1px rgba(0,0,0,0.7);
+}
+.taskslist li span.days{
     margin-left: 10px;
-    display: inline-block;
+    display: block;
     font-weight: normal;
+    font-size: 20px;
+}
+.taskslist li span.days{
+    margin-left: 10px;
+    display: block;
+    font-weight: normal;
+    font-size: 20px;
+}
+#upcommingtasks.taskslist {
+    opacity: 0.6;
+}
+#currenttasks.taskslist li span.days:before {
+    content: "Je bent ";
+}
+#currenttasks.taskslist li span.days:after {
+    content: " dagen te laat";
+}
+#upcommingtasks.taskslist li span.days {
+
+    color: rgba(255,255,255,1);
+    font-weight:bold;
+    text-shadow: 1px 1px rgba(0,0,0,0.4);
+    
+}
+#upcommingtasks.taskslist li span.days:before {
+    content: "Over ";
+}
+#upcommingtasks.taskslist li span.days:after {
+    content: " dagen";
+}
+#currenttasks.taskslist li span.days {
+
+    color: rgba(255,153,153,1);
+    font-weight:bold;
+    text-shadow: 1px 1px rgba(64,0,0,0.4);
 }
 
+
+
 .taskslist li a.done {
-    border-radius: 5px;
-    background-color: gray;
-    background-image:-webkit-linear-gradient(top, #666 0%, #333 100%);
+    border-radius: 100%;
+    box-shadow: 2px 2px rgba(0,0,0,0.5);
+    background-image: url(../img/done.png);
+    background-repeat: no-repeat;
+    background-position: center;
     float: right;
     display:inline-block;
-    color: white;
-    padding: 5px;
-    margin-top:5px;
-    line-height:30px;
+    /*padding: 5px;*/
+    height: 70px;
+    width: 70px;
+
+}
+
+.actionbar {
+    position: fixed;
+    bottom: 0px;
+    margin:0px;
+    padding: 0px;
+    width: 100%;
+
+}
+.actionbar ul {
+    list-style-type: none;
+    width: 100%;
+    text-align: center;
+}
+.actionbar li {
+    display: inline-block;
+    float: left;
+    width: 33%;
+    font-size: 40px;
+    height: 100px;
+}
+.divider {
+    width: 500px;
+    margin: 20px 0px;
+    background-repeat: no-repeat;
+    height: 20px;
+}
+.tussenkop {
+    font-size: 30px;
+    opacity: 0.8;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 1px 1px rgba(0,0,0,0.7), 0px 0px 10px rgba(0,0,0,0.6);
+    font-family: Roboto Bold;
+    text-align: center;
+    margin: 5px;
+
+    background-image: url(../img/divider.png);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    padding-bottom: 15px;
+    clear: both;
+}
+#tasksbutton {
+    background-image: url(../img/buttonlist.png);
+    background-repeat: no-repeat;
+    width: 130px;
+    position:fixed;
+    left: 60px;
+    bottom: 0px;
+    height: 114px;
+}
+#panicbutton {
+    background-image: url(../img/panic.png);
+    background-repeat: no-repeat;
+    width: 200px;
+    position:fixed;
+    left: 170px;
+    bottom: 0px;
+    height: 154px;
+}
+#tipsbutton {
+    background-image: url(../img/buttontips.png);
+    background-repeat: no-repeat;
+    width: 130px;
+    position:fixed;
+    left: 350px;
+    bottom: 0px;
+    height: 114px;
+}
+#upcommingtasks {
+    margin-left: 20px;
 }
 @keyframes fade {
     from { opacity: 1.0; }
